@@ -1,0 +1,21 @@
+{
+  "name": "thanhquang",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "apollo-server": "^3.6.7",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "graphql": "^16.3.0",
+    "mongoose": "^6.2.9",
+    "nodemon": "^2.0.15"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
