@@ -30,7 +30,7 @@ mongoose.Promise = global.Promise;
 const typeDefs = gql`
 type Author{
     id:ID
-    name :String 
+    name:String 
     age:Int 
     books:[Book]
 }
