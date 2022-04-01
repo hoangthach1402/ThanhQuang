@@ -236,25 +236,13 @@ async  function startApp(){
     resolvers,
    
   })
-
- await app.use(cors())
-//  await app.use('/graphql', expressGraphQL({
-// graphiql: true,
-// })
-// )
   
   await server.start()
+  await app.use(cors())
   await  server.applyMiddleware({ app })
-//   await app.use(
-//     '/graphql',
-//     graphqlExpress(req => ({
-//       schema,
-//       context: {
-//         user: req.user
-//       }
-//     })),
-// );
-app.listen({ port: process.env.PORT || 4000 }, () =>
+
+
+await app.listen({ port: process.env.PORT || 4000 }, () =>
 	console.log(`Server ready at http://localhost:4000${server.graphqlPath}`)
 )
 } 
