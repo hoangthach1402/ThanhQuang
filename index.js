@@ -1,8 +1,7 @@
+require('dotenv').config()
 const PORT=4000 
 const mongoose = require("mongoose");
-const express = require('express')
-const { ApolloServer } = require('apollo-server-express')
-const expressGraphQL = require('express-graphql').graphqlHTTP
+const { ApolloServer } = require("apollo-server");
 
 
 const Book = require("./Model/Book.js");
@@ -229,21 +228,11 @@ console.log(parent);
     },
   },
 };
-async  function startApp(){
-  const app = express()
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-   
-  })
-  
-  await server.start()
-  await app.use(cors())
-  await  server.applyMiddleware({ app })
-
-
-await app.listen({ port: process.env.PORT || 4000 }, () =>
-	console.log(`Server ready at http://localhost:4000${server.graphqlPath}`)
-)
-} 
-startApp()
+const server = new ApolloServer({ 
+  typeDefs, 
+  resolvers
+ 
+});
+server.listen({ port: process.env.PORT || 4000 }).then(({ url }) => {
+  console.log(`🚀 Server ready at ${url}`);
+});
