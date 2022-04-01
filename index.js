@@ -1,6 +1,10 @@
+const PORT=4000 
 const mongoose = require("mongoose");
+const express = require('express')
+const { ApolloServer } = require('apollo-server-express')
+const expressGraphQL = require('express-graphql').graphqlHTTP
 
-const { ApolloServer, gql } = require("apollo-server");
+
 const Book = require("./Model/Book.js");
 const Product = require("./Model/Product.js");
 const Order = require("./Model/Order.js");
@@ -225,9 +229,33 @@ console.log(parent);
     },
   },
 };
+async  function startApp(){
+  const app = express()
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+   
+  })
 
-const server = new ApolloServer({ cors: true, typeDefs, resolvers });
-
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+ await app.use(cors())
+ await app.use('/graphql', expressGraphQL({
+graphiql: true,
+})
+)
+  
+  await server.start()
+  await  server.applyMiddleware({ app })
+//   await app.use(
+//     '/graphql',
+//     graphqlExpress(req => ({
+//       schema,
+//       context: {
+//         user: req.user
+//       }
+//     })),
+// );
+  app.listen(PORT, () =>
+    console.log(`Server ready at http://localhost:4000`)
+  )
+} 
+startApp()
