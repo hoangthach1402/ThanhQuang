@@ -238,10 +238,10 @@ async  function startApp(){
   })
 
  await app.use(cors())
- await app.use('/graphql', expressGraphQL({
-graphiql: true,
-})
-)
+//  await app.use('/graphql', expressGraphQL({
+// graphiql: true,
+// })
+// )
   
   await server.start()
   await  server.applyMiddleware({ app })
