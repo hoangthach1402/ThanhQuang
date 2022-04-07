@@ -2,7 +2,7 @@ require('dotenv').config()
 const PORT=4000 
 const mongoose = require("mongoose");
 const { ApolloServer,gql } = require("apollo-server");
-
+const cors = require('cors')
 
 const Book = require("./Model/Book.js");
 const Product = require("./Model/Product.js");
@@ -229,6 +229,10 @@ console.log(parent);
   },
 };
 const server = new ApolloServer({ 
+cors:{
+  origin:'*',
+  credentials:true
+},
   typeDefs, 
   resolvers
 });
