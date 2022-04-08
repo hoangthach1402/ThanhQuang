@@ -2,7 +2,7 @@ require('dotenv').config()
 const PORT=4000 
 const mongoose = require("mongoose");
 const { ApolloServer,gql } = require("apollo-server");
-
+// const cors = require('cors')
 
 const Book = require("./Model/Book.js");
 const Product = require("./Model/Product.js");
@@ -30,7 +30,7 @@ mongoose.Promise = global.Promise;
 const typeDefs = gql`
 type Author{
     id:ID
-    name :String 
+    name:String 
     age:Int 
     books:[Book]
 }
@@ -42,17 +42,17 @@ type Book {
 }
 type User {
    id:ID
-   name:String 
-   email:String 
-   mobile:String 
-   password:String 
+   name:String! 
+   mobile:String! 
+   address:String! 
    orders:[Order]
 } 
+  
 type Product{
   id:ID
-  name:String 
-  price:Float
-  stock:Int 
+  name:String! 
+  price:Float!
+  stock:Int! 
   type:String 
   img:String
   orders:[Order]   
@@ -61,6 +61,7 @@ type Order {
   id:ID 
   user:User
   products:[Product]
+  payying:Int
 } 
 
 type Query {
@@ -85,9 +86,9 @@ type Mutation {
     editBook(id:ID!,name:String!,genre:String!,authorId:String!):Book 
     deleteBook(id:ID!) :Book 
     deleteAuthor(id:ID!):Author 
-   createUser(name:String!, email:String!, mobile:String!, password:String!):User 
-   createProduct(name:String!,stock:Int!,type:String!,img:String!,price:Float!):Product 
-   createOrder(userId:ID!,productId:ID!):Order 
+   createUser(name:String!, mobile:String!, address:String!):User 
+   createProduct(name:String!,stock:Int!,type:String!,img:String,price:Float!):Product 
+   createOrder(userId:ID!,productId:ID!,payying:Int!):Order 
 }   
  `;
 
@@ -229,6 +230,10 @@ console.log(parent);
   },
 };
 const server = new ApolloServer({ 
+cors:{
+  origin:'*',
+  credentials:true
+},
   typeDefs, 
   resolvers
 });
