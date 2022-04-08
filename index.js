@@ -42,17 +42,17 @@ type Book {
 }
 type User {
    id:ID
-   name:String 
-   mobile:String 
-   address:String 
+   name:String! 
+   mobile:String! 
+   address:String! 
    orders:[Order]
 } 
   
 type Product{
   id:ID
-  name:String 
-  price:Float
-  stock:Int 
+  name:String! 
+  price:Float!
+  stock:Int! 
   type:String 
   img:String
   orders:[Order]   
@@ -86,7 +86,7 @@ type Mutation {
     editBook(id:ID!,name:String!,genre:String!,authorId:String!):Book 
     deleteBook(id:ID!) :Book 
     deleteAuthor(id:ID!):Author 
-   createUser(name:String!, mobile:String, address:String):User 
+   createUser(name:String!, mobile:String!, address:String!):User 
    createProduct(name:String!,stock:Int!,type:String!,img:String,price:Float!):Product 
    createOrder(userId:ID!,productId:ID!,payying:Int!):Order 
 }   
