@@ -20,8 +20,6 @@ var productSchema = new mongoose.Schema({
     },
     img:{
         type:String,
-        required:true,
-      
     },
     price:{
         type:Number,
@@ -30,6 +28,8 @@ var productSchema = new mongoose.Schema({
     },
 });
   
+    
+      
 
 //Export the model
 module.exports = mongoose.model('product', productSchema);
