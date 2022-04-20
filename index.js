@@ -1,14 +1,10 @@
-require('dotenv').config()
-const PORT=4000 
+require("dotenv").config();
+const PORT = 4000;
 const mongoose = require("mongoose");
-const { ApolloServer,gql } = require("apollo-server");
+const { ApolloServer, gql } = require("apollo-server");
 // const cors = require('cors')
-
-const Book = require("./Model/Book.js");
-const Product = require("./Model/Product.js");
-const Order = require("./Model/Order.js");
+const Owner = require("./Model/Owner")
 const User = require("./Model/User.js");
-const Author = require("./Model/Author");
 const cors = require("cors");
 
 mongoose.connect(
@@ -28,160 +24,61 @@ mongoose.connect(
 mongoose.Promise = global.Promise;
 
 const typeDefs = gql`
-type Author{
-    id:ID
-    name:String 
-    age:Int 
-    books:[Book]
-}
-type Book {
-    id:ID 
-    name: String
-    genre: String
-    author: Author
-}
 type User {
    id:ID
    name:String! 
-   mobile:String! 
-   address:String! 
-   orders:[Order]
+   mobile:String!
+   address:String!
 } 
-  
-type Product{
-  id:ID
-  name:String! 
-  price:Float!
-  stock:Int! 
-  type:String 
-  img:String
-  orders:[Order]   
-}
-type Order {
-  id:ID 
-  user:User
-  products:[Product]
-  payying:Int
-} 
+
+
+
 
 type Query {
-    book(id:ID!):Book 
-    author(id:ID!):Author 
-    books:[Book]
-    authors:[Author] 
-        
-  users:[User] 
+  users(page:Int!,limit:Int!):[User] 
   user(id: ID!): User 
-  
-  orders:[Order] 
-  order(id:ID!):Order 
-  products:[Product]
-  product(id: ID!):Product
+  searchUserByMobile(mobile:String!):[User]
+
 }
+
+
 type Mutation {
- 
-    createBook(name:String!, genre:String! ,authorId:String!):Book 
-    createAuthor(name:String!,age:Int!):Author 
-    editAuthor(id:ID!,name:String,age:Int):Author 
-    editBook(id:ID!,name:String!,genre:String!,authorId:String!):Book 
-    deleteBook(id:ID!) :Book 
-    deleteAuthor(id:ID!):Author 
-   createUser(name:String!, mobile:String!, address:String!):User 
-   createProduct(name:String!,stock:Int!,type:String!,img:String,price:Float!):Product 
-   createOrder(userId:ID!,productId:ID!,payying:Int!):Order 
+  createUser(name:String!,password:String!):User
+  
 }   
+ 
  `;
 
-
 const resolvers = {
-  User:{
-  orders:async(parent,args)=>{
-//   let listOrder =[] 
-console.log(parent);
-  let orderList = await Order.find({userId:parent._id}) 
-//   console.log(orderList);
- return orderList
-}
-   
-  
-  },
-  Product: {
-    orders: async (parent, args) => {
-      let productId = parent._id;
-      const order = await Order.find();
-      let listOrder = [];
-      for (var i = 0; i < order.length; i++) {
-        let listOrderProduct = order[i].productId.split(",");
-        for (var j = 0; j < listOrderProduct.length; j++) {
-          if (listOrderProduct[j] == productId) {
-            listOrder.push(order[i]);
-          }
-        }
-      }
-
-      return listOrder;
-    },
-  },
-  Book: {
-    author: async ({ authorId }, args) => {
-      const result = await Author.findById(authorId);
-      return result;
-    },
-  },
-  Author: {
-    books: async ({ _id }, args) => {
-      const result = await Book.find({ authorId: _id });
-      return result;
-    },
-  },
-  Order: {
-    user: async (parent, args) => {
-      // console.log(parent)
-      const user = await User.findById(parent.userId);
-      return user;
-    },
-    products: async (parent, args) => {
-      let listProducts = parent.productId.split(",");
-      let newListProduct = [];
-      for (var i = 0; i < listProducts.length; i++) {
-        var item = await Product.findById(listProducts[i]);
-        newListProduct.push(item);
-      }
-      return newListProduct;
-    },
-  },
-
   Query: {
-    books: async () => {
-      return await Book.find();
+    searchUserByMobile:async (parent,{mobile})=>{
+     console.log(mobile.slice(0,1))
+     const isMobile = mobile.slice(0,1)=="0";
+     
+     if(isMobile){
+      const searchString = mobile ; 
+      const pattern =new RegExp(searchString);
+      console.log(pattern)
+     return await User.find({mobile:{$regex:pattern}}).limit(2).sort({name:1})
+     }else{
+      const searchString = mobile ; 
+      const pattern =new RegExp(searchString,'i');
+      console.log(pattern)
+     return await User.find({name:{$regex:pattern}}).limit(2).sort({name:1});
+     }
     },
-    book: async (parent, { id }) => {
-      return await Book.findById(id);
+   
+    users: async (parent,{page,limit}) => {
+       console.log( await User.count()); 
+      var skip = (page-1)*limit ;
+     
+      const userPage = await User.find({}).skip(skip).limit(limit);
+  
+      return userPage
     },
-    authors: async () => {
-      return await Author.find();
-    },
-    author: async (parent, { id }) => {
-      return await Author.findById(id);
-    },
-    users: async () => {
-      return await User.find({});
-    },
-    user:async(parent,{id})=>{
-    return await User.findById(id)
-    },
-    orders: async () => {
-      return await Order.find({});
-    },
-
-    order: async (parent, { id }) => {
-      return await Order.findById(id);
-    },
-    product: async (parent, { id }) => {
-      return await Product.findById(id);
-    },
-    products: async () => {
-      return await Product.find({});
+    
+    user: async (parent, { id }) => {
+      return await User.findById(id);
     },
   },
   Mutation: {
@@ -189,55 +86,18 @@ console.log(parent);
       const newUser = await new User(args);
       return await newUser.save();
     },
-    createProduct: async (parent, args) => {
-      const newProduct = await new Product(args);
-      return await newProduct.save();
-    },
-    createOrder: async (parent, args) => {
-      const newOrder = await new Order(args);
-      return await newOrder.save();
-    },
-    createAuthor: async (parent, args) => {
-      const newOrder = await new Author(args);
-      return await newOrder.save();
-    },
-    createBook: async (parent, args) => {
-      const newOrder = await new Book(args);
-      return await newOrder.save();
-    },
-    editAuthor: async (parent, args) => {
-      //  console.log(args);
-      let editAuthor = await Author.findByIdAndUpdate(args.id);
-      editAuthor.name = args.name;
-      editAuthor.age = args.age;
-      editAuthor.save();
-      return editAuthor;
-    },
-    editBook: async (parent, args) => {
-      let editBook = await Book.findByIdAndUpdate(args.id);
-      (editBook.name = args.name),
-        (editBook.genre = args.genre),
-        (editBook.authorId = args.authorId);
-      await editBook.save();
-      return editBook;
-    },
-    deleteAuthor: async (parent, args) => {
-      return await Author.findByIdAndDelete(args.id);
-    },
-    deleteBook: async (parent, args) => {
-      return await Book.findByIdAndDelete(args.id);
-    },
   },
 };
-const server = new ApolloServer({ 
-cors:{
-  origin:'*',
-  credentials:true
-},
-  typeDefs, 
-  resolvers
+
+const server = new ApolloServer({
+  cors: {
+    origin: "*",
+    credentials: true,
+  },
+  typeDefs,
+  resolvers,
 });
- 
+
 server.listen({ port: process.env.PORT || 4000 }).then(({ url }) => {
   console.log(`🚀 Server ready at ${url}`);
 });
